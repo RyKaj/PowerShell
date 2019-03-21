@@ -1,21 +1,23 @@
 ﻿<# 
+.AUTHOR: Ryan Kajiura
+
 .SYNOPSIS 
-Script that will generate an HTML report on Team City configurations
+	Script that will generate an HTML report on Team City configurations
  
 .DESCRIPTION 
-This script will access all Team City GET API and proivde a report. Default output will the users download directory
+	This script will access all Team City GET API and proivde a report. Default output will the users download directory
 
+.OUTPUTS
+    Default save location will be logged in users download directory
+	
 
+.Example Providng ID/Password
+	GetTeamCityAuditReport -TeamCityDomain "http://ABC123.com" -username "ryank" -password "abc123";
 
-Author: Ryan Kajiura
+.Example Providng ID/Password - change output directory
+	GetTeamCityAuditReport -TeamCityDomain "http://ABC123.com" -username "ryank" -password "abc123" -outputlocation "$($env:USERPROFILE)\Downloads\TeamCityAuditReport.html";
 
- 
-.Required Changes
-	Search and change these variable values to your organizations information
-		$username - Credentials
-		$password - Credentials
-		$TeamCityDomain - Corporate Domain
-
+		
 .Reference
     TeamCity Resources
         https://confluence.jetbrains.com/display/TCD18/REST+API
@@ -23,17 +25,26 @@ Author: Ryan Kajiura
 
 #>
 
+function GetTeamCityAuditReport {
+    param(
+        [Parameter(Mandatory=$true)] [String] ${TeamCityDomain}
+		, [Parameter(Mandatory=$true)] [String] ${username}
+		, [Parameter(Mandatory=$true)] [String] ${password}
+		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\TeamCityAuditReport.html"
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        )
 
+    clear;
+    
+    write-host "function being executed '$($MyInvocation.MyCommand)' ";
+	
 
     #################################################################################################
     ## Variables - Static
     #################################################################################################    
     [DateTime] $STARTTIME = Get-Date;	
     [String] $SPACER = "<br />";
-    [String] $htmlfile = "TeamCityAuditReport.html";
-    [String] $outputlocation = "$($env:USERPROFILE)\Downloads\${htmlfile}";
-    [String] $TeamCityDomain = "http://build.pinnaclesports.com";
-    [String] $TeamCityURI = "${TeamCityDomain}/httpAuth/app/rest";
+	[String] $TeamCityURI = "${TeamCityDomain}/httpAuth/app/rest";
     
 
     #################################################################################################
@@ -43,9 +54,21 @@ Author: Ryan Kajiura
     $htmlreport = @();
     $htmlbody = @();
 
-    $username = "ryank";
-    $password = "abc123";
+    #######################################################################################################
+    ###   DEBUG
+    #######################################################################################################
+    if ($DebugMode -eq $True) {        
+        foreach ( $key in (Get-Command -Name $MyInvocation.InvocationName).Parameters.Keys ) {
+            $value = (Get-Variable $key -ErrorAction SilentlyContinue).Value
+            if ( ${value} -or ${value} -eq 0 ) {
+                Write-Host "Function parameter...${key} -> ${value}";
+            } 
+        }        
+    }
+	
+	
 
+	
     #BEGIN {
         $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes( ( "{0}:{1}" -f ${username}, ${password} ) ) );
         $header = @{ Authorization="Basic ${base64AuthInfo}" };
@@ -779,3 +802,5 @@ $GroupDetails = Invoke-RestMethod -Headers $header -Uri "${TeamCityURI}/userGrou
 		$htmlreport | Out-File ${outputlocation} -Encoding Utf8 -force;
 
     #} #End
+	
+}  #Function	
