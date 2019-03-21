@@ -118,7 +118,7 @@ function GetBitbucketCommitsReport {
         Write-Host "Collecting Projects commits Information...";
 
         foreach ($proj in $Projects.values | SELECT key ) {
-            Write-Host "Collecting Projects '${proj}' commits Information...";    
+            Write-Host "Collecting Projects '$($proj.key)' commits Information...";    
             ##Start-Job -Name "Project" -ScriptBlock { 
                 $repos = Invoke-RestMethod -Headers ${header} -Uri "${BitbucketURI}/projects/$($proj.key)/repos?limit=${limits}" -Method Get;
             ##};
