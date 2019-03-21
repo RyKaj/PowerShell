@@ -1,20 +1,28 @@
 ﻿<# 
+.AUTHOR: Ryan Kajiura - http://ca.linkedin.com/in/ryankajiura
+
 .SYNOPSIS 
-Script that will generate an HTML report on the Octopus project configurations
+	Script that will generate an HTML report on the Octopus project configurations
  
 .DESCRIPTION 
-This script will access all Octopus GET API and proivde a report. Default output will the users download directory
+	This script will access all Octopus GET API and proivde a report. Default output will the users download directory
+
+.OUTPUTS
+    Default save location will be logged in users download directory
+
+.PARAMETER -DebugMode
+    List parameter and variables
+	
+.PARAMETER -Verbose
+    See more detailed progress as the script is running.
 
 
+.Example Providng API KEY
+	OctopusVariableReport -OCTOPUSDomain "http://ABC123.com" -APIKEY "API-00000000000000";
 
+.Example Providng API KEY  - change output directory
+	OctopusVariableReport -OCTOPUSDomain "http://ABC123.com" -APIKEY "API-00000000000000" -outputlocation "$($env:USERPROFILE)\Downloads\OctopusVariableReport.html";
 
-Author: Ryan Kajiura
-
- 
-.Required Changes
-	Search and change these variable values to your organizations information
-		$APIKEY	- I used Administrator Token
-		$OCTOPUSDomain - Corporate Domain
 
 .Reference
 	Octopus Swagger
@@ -22,16 +30,26 @@ Author: Ryan Kajiura
 #>
 
 
+function OctopusVariableReport {
+    param(
+        [Parameter(Mandatory=$true)] [String] ${OCTOPUSDomain}
+		, [Parameter(Mandatory=$true)] [String] ${APIKEY}		
+		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\OctopusVariableReport.html"
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        )
+
+    clear;
+    
+    write-host "function being executed '$($MyInvocation.MyCommand)' ";
+	
+	
     #######################################################################################################
     # Constants
     #######################################################################################################
     [DateTime] $STARTTIME = get-date;	
     [String] $SPACER = "<br />";
-    [String] $outputlocation = "$($env:USERPROFILE)\Downloads\Octopus - Variables.html";
-
+    
     # Connection variables
-    [String]$APIKEY = "API-00000000000000"; #Admin_Octopus
-    [String]$OCTOPUSDomain = "http://ABC123.com"
     [String]$OCTOPUSURI = "${OCTOPUSDomain}/octopus/api"
 
 
@@ -42,7 +60,19 @@ Author: Ryan Kajiura
     $htmlreport = @();
     $htmlbody = @();
 
-
+    #######################################################################################################
+    ###   DEBUG
+    #######################################################################################################
+    if ($DebugMode -eq $True) {        
+        foreach ( $key in (Get-Command -Name $MyInvocation.InvocationName).Parameters.Keys ) {
+            $value = (Get-Variable $key -ErrorAction SilentlyContinue).Value
+            if ( ${value} -or ${value} -eq 0 ) {
+                Write-Host "Function parameter...${key} -> ${value}";
+            } 
+        }        
+    }
+	
+	
 
     #BEGIN { 
         clear;
@@ -657,3 +687,8 @@ Author: Ryan Kajiura
 	"Total Duration: {0:HH:mm:ss}" -f ([datetime]$((get-date) - ${StartTime}).Ticks) | write-host;
 	write-host "-------------------------------------------------------------------";
 
+}  #Function
+
+
+
+OctopusVariableReport
