@@ -1,24 +1,33 @@
 ﻿<# 
+.AUTHOR: Ryan Kajiura - http://ca.linkedin.com/in/ryankajiura
+
 .SYNOPSIS 
-Script that will generate an HTML report on the Bitbucket project configurations
+	Script that will generate an HTML report on the Bitbucket project configurations
  
 .DESCRIPTION 
-This script will access all Bitbucket GET API and proivde a report. Default output will the users download directory
+	This script will access all Bitbucket GET API and proivde a report. Default output will the users download directory
 
+.OUTPUTS
+    Default save location will be logged in users download directory
 
+Z.PARAMETER -DebugMode
+    List parameter and variables
+	
+.PARAMETER -Verbose
+    See more detailed progress as the script is running.
 
+	
+.Example Providng ID/Password
+	GetBitbucketCommitsReport -BitbucketDomain "http://ABC123.com" -username "ryank" -password "abc123" -UsersCommit "ryana, ryanb, ryanc, ryand";
 
-Author: Ryan Kajiura
+.Example Providng ID/Password - change output directory
+	GetBitbucketCommitsReport -BitbucketDomain "http://ABC123.com" -username "ryank" -password "abc123" -UsersCommit "ryana, ryanb, ryanc, ryand" -outputlocation "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html";
 
- 
-.Required Changes
-	Search and change these variable values to your organizations information
-		$username - Credentials
-		$password - Credentials
-		$BitbucketDomain - Corporate Domain
-		$limits - amount of records that are returned
-		$FindSpecifcUserCommits - array of user ids that you want to investigate
+.Example Providng ID/Password - change output directory and number of records to return
+	GetBitbucketCommitsReport -BitbucketDomain "http://ABC123.com" -username "ryank" -password "abc123" -UsersCommit "ryana, ryanb, ryanc, ryand" -outputlocation "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html" -RecordLimit = 10;
 		
+
+
 
 .Reference
     Bitbucket Resources
@@ -27,45 +36,60 @@ Author: Ryan Kajiura
 #>
 
 
-
+function GetBitbucketCommitsReport {
+    param(
+        [Parameter(Mandatory=$true)] [String] ${BitbucketDomain}
+		, [Parameter(Mandatory=$true)] [String] ${username}
+		, [Parameter(Mandatory=$true)] [String] ${password}
+		, [Parameter(Mandatory=$true)] [String[]] ${UsersCommit}
+		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketCommitReport.html"
+		, [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        )
+    clear;
+    
+    write-host "function being executed '$($MyInvocation.MyCommand)' ";
+	
+	
     #################################################################################################
     ## Variables - Static
     #################################################################################################    
     [DateTime] $STARTTIME = Get-Date;
     [String] $SPACER = "<br />";
-    [String] $htmlfile = "Bitbucket Commits Report.html";
-    [String] $outputlocation = "$($env:USERPROFILE)\Downloads\${htmlfile}";
-    [String] $BitbucketDomain = "http://ABC.com";
     [String] $BitbucketURI = "${BitbucketDomain}/rest/api/1.0";
-    [String] $limits = 1000;
 
     #################################################################################################
     ## Variables - Session
     #################################################################################################    
     $temp = "";
-    $username = "abc";
-    $password = "abc123";
     $htmlreport = @();
     $htmlbody = @();
 
 
-    #################################################################################################
-    ## List all users
-    #################################################################################################    
-
-    $FindSpecifcUserCommits = @(
-                    , "ryank"
-                   )
 
 
-
+    #######################################################################################################
+    ###   DEBUG
+    #######################################################################################################
+    if ($DebugMode -eq $True) {        
+        foreach ( $key in (Get-Command -Name $MyInvocation.InvocationName).Parameters.Keys ) {
+            $value = (Get-Variable $key -ErrorAction SilentlyContinue).Value
+            if ( ${value} -or ${value} -eq 0 ) {
+                Write-Host "Function parameter...${key} -> ${value}";
+            } 
+        }        
+    }
+	
+	
 
     #BEGIN {
         $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes( ( "{0}:{1}" -f ${username}, ${password} ) ) );
         $header = @{ Authorization="Basic ${base64AuthInfo}" };
         $header["X-Atlassian-Token"] = "nocheck";
 
-        
+        $FindSpecifcUserCommits = ${UsersCommit}.Split(",");
+		
+		
         #Start-Job -Name "Projects" -ScriptBlock { 
             $Projects = Invoke-RestMethod -Headers ${header} -Uri "${BitbucketURI}/projects?limit=${limits}" -Method Get;
         #};
@@ -240,3 +264,6 @@ Author: Ryan Kajiura
 		$htmlreport | Out-File ${outputlocation} -Encoding Utf8 -force;
 
     #} #End
+	
+	
+}  #Function	

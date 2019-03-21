@@ -689,6 +689,3 @@ function OctopusVariableReport {
 
 }  #Function
 
-
-
-OctopusVariableReport
