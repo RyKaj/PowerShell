@@ -42,7 +42,7 @@ function GetBitbucketAuditReport {
 		, [Parameter(Mandatory=$true)] [String] ${password}
 		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html"
 		, [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
-        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
         )
 
     clear;

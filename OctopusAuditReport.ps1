@@ -36,7 +36,7 @@ function OctopusAuditReport {
         [Parameter(Mandatory=$true)] [String] ${OCTOPUSDomain}
 		, [Parameter(Mandatory=$true)] [String] ${APIKEY}		
 		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\OctopusAuditReport.html"
-        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
         )
 
     clear;

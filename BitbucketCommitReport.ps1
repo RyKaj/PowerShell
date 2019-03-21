@@ -44,7 +44,7 @@ function GetBitbucketCommitsReport {
 		, [Parameter(Mandatory=$true)] [String[]] ${UsersCommit}
 		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketCommitReport.html"
 		, [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
-        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
         )
     clear;
     

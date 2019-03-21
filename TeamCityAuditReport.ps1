@@ -31,7 +31,7 @@ function GetTeamCityAuditReport {
 		, [Parameter(Mandatory=$true)] [String] ${username}
 		, [Parameter(Mandatory=$true)] [String] ${password}
 		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\TeamCityAuditReport.html"
-        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $true
+        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
         )
 
     clear;
