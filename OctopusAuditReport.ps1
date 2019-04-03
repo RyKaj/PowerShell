@@ -215,7 +215,29 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Password.PSObject.Properties) {
-                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    DownloadAttempts,
+                                    DownloadRetryBackoffSeconds,
+                                    @{
+                                        name = "PackageAcquisitionLocationOption"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.PackageAcquisitionLocationOption.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                 }
                                             )
                                         }
@@ -248,7 +270,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.EnvironmentIds.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -259,7 +281,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.PrivateKeyFile.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -269,18 +291,18 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.PrivateKeyPassphrase.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
                                         },
-                                        TenantedDeploymentParticipation,
+                                        TenantedDeploymentParticipation,                                        
                                         @{
                                             name = "TenantIds"
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.TenantIds.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -290,7 +312,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.TenantTags.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -318,9 +340,37 @@ function OctopusAuditReport {
                                         Name,
                                         Description,
                                         SupportedRestrictions,
+                                        @{
+                                            name = "PermissionDescriptions"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.PermissionDescriptions.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        },
+                                        @{
+                                            name = "GrantedPermissions"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.GrantedPermissions.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        },
                                         CanBeDeleted,
-                                        LastModifiedOn,
-                                        LastModifiedBy  |
+                                        @{
+                                            name = "Links"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Links.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        }  |
                             ConvertTo-Html -Fragment;
 
             $htmlbody += ${SPACER};
@@ -342,11 +392,30 @@ function OctopusAuditReport {
                                     DisplayName,
                                     EmailAddress,
                                     Password,    
+                                    CanPasswordBeEdited,
                                     IsActive,
                                     IsService,
                                     IsRequestor,
-                                    LastModifiedOn,
-                                    LastModifiedBy  |
+                                    @{
+                                        name = "Identities"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Identities.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             
                             ConvertTo-Html -Fragment;
 
@@ -355,7 +424,7 @@ function OctopusAuditReport {
             #endregion Users
 
             #---------------------------------------------------------------------
-            # Getting all the Teas on this Octopus instance and convert to HTML fragment
+            # Getting all the Teams on this Octopus instance and convert to HTML fragment
             #---------------------------------------------------------------------
             #region Teams
             Write-Host "Processing Teams information...";
@@ -364,46 +433,63 @@ function OctopusAuditReport {
             $htmlbody += ${subhead};
 
             $htmlbody += $teams.Items | 
-                        select  ID,
-                                Name,
-                                @{
-                                    name = "MemberUserIds"
-                                    Expression = {
-                                        $(
-                                            Foreach ($property in $_.MemberUserIds.PSObject.Properties) {
-                                                "$($property.Name): $($property.Value) "
+                            select  ID,
+                                    Name,
+                                    @{
+                                        name = "MemberUserIds"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.MemberUserIds.PSObject.Properties) {
+                                                    if ($($property.Name) -contains "SyncRoot") {
+                                                        $temp = $($property.Value);
+                                                        foreach ( $i in $($property.Value).Split(" ") ) {
+                                                            $temp = $i.Trim();
+                                                            "$( $( $User | Where { $_.id -contains $temp } | select DisplayName ).DisplayName ), "
+                                                        }
+                                                    }
+                                                    else {
+                                                        "$($property.Name): $($property.Value) ";
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "ExternalSecurityGroups"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.ExternalSecurityGroups.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "TenantTags"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.TenantTags.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    CanBeDeleted,
+                                    CanBeRenamed,
+                                    CanChangeRoles,
+                                    CanChangeMembers,
+                                    @{
+                                            name = "Links"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Links.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
                                             }
-                                        )
-                                    }
-                                },
-                                @{
-                                    name = "ExternalSecurityGroups"
-                                    Expression = {
-                                        $(
-                                            Foreach ($property in $_.ExternalSecurityGroups.PSObject.Properties) {
-                                                "$($property.Name): $($property.Value) "
-                                            }
-                                        )
-                                    }
-                                },
-                                @{
-                                    name = "TenantTags"
-                                    Expression = {
-                                        $(
-                                            Foreach ($property in $_.TenantTags.PSObject.Properties) {
-                                                "$($property.Name): $($property.Value) "
-                                            }
-                                        )
-                                    }
-                                },
-                                CanBeDeleted,
-                                CanBeRenamed,
-                                CanChangeRoles,
-                                CanChangeMembers,
-                                LastModifiedOn,
-                                LastModifiedBy |
-                        Sort Name |    
-                        ConvertTo-Html -Fragment;
+                                        } |
+                            Sort Name |    
+                            ConvertTo-Html -Fragment;
 
             $htmlbody += ${SPACER};       
 
@@ -419,6 +505,22 @@ function OctopusAuditReport {
             $htmlbody += ${subhead};
 
             $htmlbody += $Environments | 
+                            Select  ID,
+                                    Name,
+                                    Description,
+                                    SortOrder,
+                                    UseGuidedFailure,
+                                    AllowDynamticInfrastructure
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             Sort Name | 
                             ConvertTo-Html -Fragment;
 
@@ -438,17 +540,33 @@ function OctopusAuditReport {
             $htmlbody += $Machines |
                                 Select  ID,
                                         Name,
-                                        Thumbprint,
-                                        Uri,
-                                        IsDisabled,
-                                        MachinePolicyId,
+                                        @{
+                                            name = "EnvironmentIds"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.EnvironmentIds.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        },
+                                        @{
+                                            name = "Roles"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Roles.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        },
                                         TenantedDeploymentParticipation,
                                         @{
                                             name = "TenantIds"
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.TenantIds.PSObject.Properties) {
-                                                        "$($property.Name): $($property.Value) "
+                                                        "$($property.Name): $($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -458,11 +576,15 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.TenantTags.PSObject.Properties) {
-                                                        "$($property.Name): $($property.Value) "
+                                                        "$($property.Name): $($property.Value) ";
                                                     }
                                                 )
                                             }
-                                        },
+                                        },                                        
+                                        Thumbprint,
+                                        Uri,
+                                        IsDisabled,
+MachinePolicyId,
                                         Status,
                                         HealthStatus,
                                         HasLatestCalamari,
@@ -473,13 +595,21 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.Endpoint.PSObject.Properties) {
-                                                        "$($property.Name): $($property.Value) "
+                                                        "$($property.Name): $($property.Value) ";
                                                     }
                                                 )
                                             }
                                         },
-                                        LastModifiedOn,
-                                        LastModifiedBy |
+                                        @{
+                                            name = "Links"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Links.PSObject.Properties) {
+                                                        "$($property.Name): $($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        } |
                                 Sort Name |
                                 ConvertTo-Html -Fragment;
 
@@ -504,14 +634,22 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.EnvironmentIds.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
                                         },
-                                        RetenionPolicytId,
-                                        LastModifiedOn,
-                                        LastModifiedBy |
+                                        RetentionPolicyId,
+                                        @{
+                                            name = "Links"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Links.PSObject.Properties) {
+                                                        "$($property.Name): $($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        } |
                                 Sort Name | 
                                 ConvertTo-Html -Fragment;
             $htmlbody += ${SPACER};
@@ -525,53 +663,120 @@ function OctopusAuditReport {
             Write-Host "Processing Projects Information...";
             $subhead = "<h3>Project Information - Count: $($Projects.Count)</h3>";
             $htmlbody += ${subhead};
-
-            $htmlbody += $ProjectList |
-                                Select  ID,
-                                        ProjectGroupID,
-                                        DeploymentProcessId,
-                                        Name,
-                                        Description,
-                                        Slug,
-                                        IsDisabled,
+          
+            $htmlbody += $Projects |
+                                Select  Id,
                                         VariableSetId,
-                                        LifeCycleID,
-                                        AutoCreatedRelease,
+                                        #@{
+                                        #    name = "VariableSet Name"
+                                        #    Expression = {
+                                        #        $temp = $_.VariableSetId;
+                                        #        $(  $LibraryVariableSets | where { $_.id -eq $temp }  | select Name ).name
+                                        #    }
+                                        #}, 
+DeploymentProcessId,
+ClonedFromProjectId,
                                         DiscreteChannelRelease,
+                                        @{
+	                                        name = "IncludedLibraryVariableSetIds"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.IncludedLibraryVariableSetIds.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        },
                                         DefaultToSkipIfAlreadyInstalled,
                                         TenantedDeploymentMode,
+                                        DefaultGuidedFailureMode,
                                         @{
-                                            name = "VersioningStrategy"
+	                                        name = "VersioningStrategy"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.VersioningStrategy.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        },
+                                        @{
+	                                        name = "ReleaseCreationStrategy"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.ReleaseCreationStrategy.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        },
+                                        @{
+	                                        name = "Templates"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.Templates.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        },
+                                        @{
+	                                        name = "AutoDeployReleaseOverrides"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.AutoDeployReleaseOverrides.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        },
+                                        Name,
+                                        Slug,
+                                        Description,
+                                        IsDisabled,
+                                        ProjectGroupId,
+                                        @{
+                                            name = "Project Group Name"
                                             Expression = {
                                                 $(
-                                                    Foreach ($property in $_.VersioningStrategy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
-                                                    }
+                                                    $temp = $_.ProjectGroupId;
+                                                    $( $ProjectGroups | where { $_.id -eq  $temp } | Select Name).Name
                                                 )
                                             }
                                         },
+
+
+                                        LifecycleId,
                                         @{
-                                            name = "ReleaseCreationStrategy"
+                                            name = "LifeCycle Name"
                                             Expression = {
                                                 $(
-                                                    Foreach ($property in $_.ReleaseCreationStrategy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
-                                                    }
+                                                    $temp = $_.LifecycleID;
+                                                    $( $LifeCycles | where { $_.id -eq  $temp } | Select Name).Name
                                                 )
                                             }
                                         },
+                                        AutoCreateRelease,
                                         @{
-                                            name = "ProjectConnectivityPolicy"
-                                            Expression = {
-                                                $(
-                                                    Foreach ($property in $_.ProjectConnectivityPolicy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
-                                                    }
-                                                )
-                                            }
+	                                        name = "ProjectConnectivityPolicy"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.ProjectConnectivityPolicy.PSObject.Properties) {
+				                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
                                         },
-                                        LastModifiedOn,
-                                        LastModifiedBy |
+                                        @{
+	                                        name = "Links"
+	                                        Expression = {
+		                                        $(
+			                                        Foreach ($property in $_.Links.PSObject.Properties) {
+				                                        "$($property.Name): $($property.Value) ";
+			                                        }
+		                                        )
+	                                        }
+                                        } |
                                 Sort Name |
                                 ConvertTo-Html -Fragment;
 
@@ -593,13 +798,13 @@ function OctopusAuditReport {
                                     Description,
                                     ActionType,
                                     Version,
-                                    CommunityActionTemplateId,
+CommunityActionTemplateId,
                                     @{
                                         name = "Packages"
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Packages.PSObject.Properties) {
-                                                    "$($property.Name) - $($property.Value) "
+                                                    "$($property.Name) - $($property.Value) ";
                                                 }
                                             )
                                         }
@@ -609,7 +814,7 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Properties.PSObject.Properties) {
-                                                    "$($property.Name) - $($property.Value) "
+                                                    "$($property.Name) - $($property.Value) ";
                                                 }
                                             )
                                         }
@@ -619,7 +824,7 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Parameters.PSObject.Properties) {
-                                                    "$($property.Name) - $($property.Value) "
+                                                    "$($property.Name) - $($property.Value) ";
                                                 }
                                             )
                                         }
@@ -629,13 +834,11 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Links.PSObject.Properties) {
-                                                    "$($property.Name) - $($property.Value) "
+                                                    "$($property.Name) - $($property.Value) ";
                                                 }
                                             )
                                         }
-                                    },
-                                    LastModifiedOn,
-                                    LastModifiedBy |
+                                    } |
                             ConvertTo-Html -Fragment;
 
             $htmlbody += ${SPACER};
@@ -662,7 +865,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.MachineHealthCheckPolicy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -672,7 +875,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.MachineConnectivityPolicy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -682,7 +885,7 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.MachineCleanupPolicy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
@@ -692,13 +895,21 @@ function OctopusAuditReport {
                                             Expression = {
                                                 $(
                                                     Foreach ($property in $_.MachineUpdatePolicy.PSObject.Properties) {
-                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
                                                     }
                                                 )
                                             }
                                         },
-                                        LastModifiedOn,
-                                        LastModifiedBy |
+                                        @{
+                                            name = "Links"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.Links.PSObject.Properties) {
+                                                        "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                    }
+                                                )
+                                            }
+                                        } |
                                 Sort Name |
                                 ConvertTo-Html -Fragment;
             $htmlbody += ${SPACER};
@@ -714,34 +925,42 @@ function OctopusAuditReport {
             $htmlbody += ${subhead};
 
             $htmlbody += $LifeCycles |
-                        Select  ID,
-                                Name,
-                                Description,
-                                @{
-                                    name = "ReleaseRetentionPolicy"
-                                    Expression = {
-                                        $(
-                                            Foreach ($property in $_.ReleaseRetentionPolicy.PSObject.Properties) {
-                                                "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
-                                            }
-                                        )
-                                    }
-                                },
-                                @{
-                                    name = "TentacleRetentionPolicy"
-                                    Expression = {
-                                        $(
-                                            Foreach ($property in $_.TentacleRetentionPolicy.PSObject.Properties) {
-                                                "$($property.Name) - ${OCTOPUSDomain}$($property.Value) "
-                                            }
-                                        )
-                                    }
-                                },
-                                Phase,
-                                LastModifiedOn,
-                                LastModifiedBy |
-                        Sort Name |
-                        ConvertTo-Html -Fragment;
+                            Select  ID,
+                                    Name,
+                                    Description,
+                                    @{
+                                        name = "ReleaseRetentionPolicy"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.ReleaseRetentionPolicy.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "TentacleRetentionPolicy"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.TentacleRetentionPolicy.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    Phase,
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name) - ${OCTOPUSDomain}$($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
+                            Sort Name |
+                            ConvertTo-Html -Fragment;
 
 
             $htmlbody += ${SPACER};
@@ -760,15 +979,25 @@ function OctopusAuditReport {
 
             $htmlbody += $Interruptions.Items |
                             Select  ID,
-                                    TaskId,
+TaskId,
                                     Title,
                                     IsPending,
+                                    @{
+                                        name = "RelatedDocumentIds"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.RelatedDocumentIds.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
                                     @{
                                         name = "Form"
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Form.PSObject.Properties) {
-                                                    "$($property.Name): $($property.Value) "
+                                                    "$($property.Name): $($property.Value) ";
                                                 }
                                             )
                                         }
@@ -778,18 +1007,27 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.ResponsibleTeamIds.PSObject.Properties) {
-                                                    "$($property.Name): $($property.Value) "
+                                                    "$($property.Name): $($property.Value) ";
                                                 }
                                             )
                                         }
                                     },
-                                    ResponsibleUserId,
+ResponsibleUserId,
                                     CanTakeResponsibility,
                                     HasResponsibility,
                                     CorrelationId,
                                     Created,
-                                    LastModifiedOn,
-                                    LastModifiedBy |
+                                    IsLinkedToOtherInterruption,
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             Sort Title |
                             ConvertTo-Html -Fragment;
 
@@ -824,6 +1062,7 @@ function OctopusAuditReport {
                             Select  ID,
                                     Name,
                                     Description,
+                                    Arguments,
                                     State,
                                     Completed,
                                     QueueTime,
@@ -840,8 +1079,16 @@ function OctopusAuditReport {
                                     HasPendingInterruptions,
                                     CanRerun,
                                     HasWarningsOrErrors,
-                                    LastModifiedOn,
-                                    LastModifiedBy  |
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             Sort Name |
                             ConvertTo-Html -Fragment;
 
@@ -868,7 +1115,7 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.Links.PSObject.Properties) {
-                                                    "$($property.Name): $($property.Value) "
+                                                    "$($property.Name): $($property.Value) ";
                                                 }
                                             )
                                         }
@@ -894,7 +1141,21 @@ function OctopusAuditReport {
                                     Name,
                                     Description,
                                     ProjectID,
+                                    @{
+                                        name = "Project Name"
+                                        Expression = {
+                                            $temp = $_.ProjectID;
+                                            $( $Projects | where { $_.id -eq $temp } | Select Name).name
+                                        }
+                                    },
                                     LifecycleID,
+                                    @{
+                                        name = "LifeCycle Name"
+                                        Expression = {
+                                            $temp = $_.LifecycleID;
+                                            $( $LifeCycles | where { $_.id -eq  $temp } | Select Name).Name
+                                        }
+                                    },                                    
                                     IsDefault  |
                             ConvertTo-Html -Fragment;
 
@@ -916,8 +1177,26 @@ function OctopusAuditReport {
                                     Name,
                                     Description,
                                     SortOrder,
-                                    LastModifiedOn,
-                                    LastModifiedBy |
+                                    @{
+                                        name = "Tags"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Tags.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             ConvertTo-Html -Fragment;
 
             $htmlbody += ${SPACER};
@@ -941,14 +1220,39 @@ function OctopusAuditReport {
                                         Expression = {
                                             $(
                                                 Foreach ($property in $_.TenantTags.PSObject.Properties) {
-                                                    "$($property.Name): $($property.Value) "
+                                                    "$($property.Name): $($property.Value) ";
                                                 }
                                             )
                                         }
                                     },
-                                    SortOrder,
-                                    LastModifiedOn,
-                                    LastModifiedBy |
+                                    @{
+                                        name = "ProjectEnvironments"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.ProjectEnvironments.PSObject.Properties) {
+                                                        "$($property.Name): $($property.Value) ->> ";
+
+                                                        $( $Projects | Where { $_.Id -contains $($property.Name) } | select Name ).Name
+
+                                                        $temp = $($property.Value);
+                                                        foreach ( $i in $($property.Value).Split(" ") ) {
+                                                            $temp = $i.Trim();
+                                                            "$( $( $Environments | Where { $_.id -contains $temp } | select Name ).Name ), "
+                                                        }
+                                                }
+                                            )
+                                        }
+                                    },
+                                    @{
+                                        name = "Links"
+                                        Expression = {
+                                            $(
+                                                Foreach ($property in $_.Links.PSObject.Properties) {
+                                                    "$($property.Name): $($property.Value) ";
+                                                }
+                                            )
+                                        }
+                                    } |
                             ConvertTo-Html -Fragment;
 
             $htmlbody += ${SPACER};
@@ -984,7 +1288,7 @@ function OctopusAuditReport {
 				            td.info {background: #85D4FF;}
 			            </style>
 			            <body>
-			            <h1 align=""center"">Server Info: $($env:COMPUTERNAME)</h1>
+			            <h1 align=""center"">Server Info: $env:computername</h1>
 			            <h3 align=""center"">Generated: ${reportime}</h3>"
 
             $htmltail = "</body>
@@ -994,7 +1298,7 @@ function OctopusAuditReport {
             
             #endregion ReportDetail
         
-            write-host "Generated Report File on Server '$($env:COMPUTERNAME)' stored '${outputlocation}' ";
+            write-host "Generated File ${outputlocation}";
             $htmlreport | Out-File ${outputlocation} -Encoding Utf8 -force;              
         #} #End
 
@@ -1003,5 +1307,6 @@ function OctopusAuditReport {
         write-host "-------------------------------------------------------------------";
         "Total Duration: {0:HH:mm:ss}" -f ([datetime]$((get-date) - ${StartTime}).Ticks) | write-host;
         write-host "-------------------------------------------------------------------";
+
 
 }  #Function
