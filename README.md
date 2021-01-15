@@ -16,6 +16,15 @@ Output HTML format on:
 Output HTML format on:
 All projects repo's commit
 
+## DeploymentDebugLogs.ps1
+**Purpose**: Get system information or target information during build or deployment. Help trouble shoot issues
+Output : Build/Deployment logs
+
+## DeploymentDebugLogs.sh
+**Purpose**: Get system information or target information during build or deployment. Help trouble shoot issues
+Output : Build/Deployment logs
+
+
 ## OctopusAuditReport.ps1
 **Purpose**: Fetch all information to help consolidate, cleanup configuration and provide report to the auditor.
 Output HTML format on:
