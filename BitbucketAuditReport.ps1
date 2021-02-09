@@ -35,19 +35,28 @@
 #>
 
 
-function GetBitbucketAuditReport {
-    param(
-        [Parameter(Mandatory=$true)] [String] ${BitbucketDomain}
-		, [Parameter(Mandatory=$true)] [String] ${username}
-		, [Parameter(Mandatory=$true)] [String] ${password}
-		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html"
-		, [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
-        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
-        )
+#function GetBitbucketAuditReport {
+#    param(
+#        [Parameter(Mandatory=$true)] [String] ${BitbucketDomain}
+#		, [Parameter(Mandatory=$true)] [String] ${username}
+#		, [Parameter(Mandatory=$true)] [String] ${password}
+#		, [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html"
+#		, [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
+#        , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
+#        )
+#
+#    clear;
+#    
+#    write-host "function being executed '$($MyInvocation.MyCommand)' ";
 
-    clear;
-    
-    write-host "function being executed '$($MyInvocation.MyCommand)' ";
+${outputlocation} = "$($env:USERPROFILE)\Downloads\BitbucketAuditReport.html"
+
+# Main Production Server
+${BitbucketDomain} = "https://git.pyrsoftware.ca/stash";
+${username} = "kajiurya";
+${password} = "Pokerst@r00";
+${limits} = 1000
+
 	
     #################################################################################################
     ## Variables - Static
@@ -67,14 +76,14 @@ function GetBitbucketAuditReport {
     #######################################################################################################
     ###   DEBUG
     #######################################################################################################
-    if ($DebugMode -eq $True) {        
-        foreach ( $key in (Get-Command -Name $MyInvocation.InvocationName).Parameters.Keys ) {
-            $value = (Get-Variable $key -ErrorAction SilentlyContinue).Value
-            if ( ${value} -or ${value} -eq 0 ) {
-                Write-Host "Function parameter...${key} -> ${value}";
-            } 
-        }        
-    }
+#    if ($DebugMode -eq $True) {        
+#        foreach ( $key in (Get-Command -Name $MyInvocation.InvocationName).Parameters.Keys ) {
+#            $value = (Get-Variable $key -ErrorAction SilentlyContinue).Value
+#            if ( ${value} -or ${value} -eq 0 ) {
+#                Write-Host "Function parameter...${key} -> ${value}";
+#            } 
+#        }        
+#    }
 	
 	
 
@@ -114,7 +123,7 @@ function GetBitbucketAuditReport {
         # Getting Users and convert to HTML fragment
         #---------------------------------------------------------------------
         #region Users
-        Write-Host "Collecting Users Information...";
+        Write-Host "`nCollecting Users Information...";
         $subhead = "<h2>Users - Count: $($Users.size)</h2>";
         $htmlbody += ${subhead};
 
@@ -153,7 +162,7 @@ function GetBitbucketAuditReport {
         # Getting Groups and convert to HTML fragment
         #---------------------------------------------------------------------
         #region Groups        
-        Write-Host "Collecting Groups Information...";
+        Write-Host "`nCollecting Groups Information...";
         $subhead = "<h2>Groups - Count: $($Groups.size)</h2>";
         $htmlbody += ${subhead};
 
@@ -177,7 +186,7 @@ function GetBitbucketAuditReport {
         # Getting all Projects and convert to HTML fragment
         #---------------------------------------------------------------------
         #region Project
-        Write-Host "Collecting Project Information...";
+        Write-Host "`nCollecting Project Information...";
         $subhead = "<h2>Projects - Count: $($Projects.size)</h2>";
         $htmlbody += ${subhead};
 
@@ -215,7 +224,7 @@ function GetBitbucketAuditReport {
         # Getting all Projects and repos permission and convert to HTML fragment
         #---------------------------------------------------------------------
         #region ProjectRepos
-        Write-Host "Collecting Projects repos Information...";
+        Write-Host "`nCollecting Projects repos Information...";
         $Projects.values | SELECT  key | foreach {
             $temp = $_;
 
@@ -224,7 +233,8 @@ function GetBitbucketAuditReport {
             
             
             ##Start-Job -Name "repos" -ScriptBlock { 
-                $repos = Invoke-RestMethod -Headers ${header}  -Uri "${BitbucketURI}/projects/$($temp.key)/repos?limit=${limits}" -Method Get;
+Write-Host "Fetching repo from project $($temp.key)...";
+                $repos = Invoke-RestMethod -Headers ${header} -Uri "${BitbucketURI}/projects/$($temp.key)/repos?limit=${limits}" -Method Get;
             ##};
             ##Wait-Job -Name "repos";
                                                
@@ -247,7 +257,7 @@ function GetBitbucketAuditReport {
         # Getting all Recent Repo and convert to HTML fragment
         #---------------------------------------------------------------------
         #region ProjectRepoDetail
-        Write-Host "Collecting Recent Repos Information...";
+        Write-Host "`nCollecting Recent Repos Information...";
         $subhead = "<h2>Recent Repos - Count: $($RecentRepo.size)</h2>";
         $htmlbody += ${subhead};
 
@@ -298,7 +308,7 @@ function GetBitbucketAuditReport {
         #---------------------------------------------------------------------
         # Getting all Projects - repos and convert to HTML fragment
         #---------------------------------------------------------------------
-        #Write-Host "Collecting Projects repos Information...";
+        #Write-Host "`nCollecting Projects repos Information...";
         #
         #$Projects.values | SELECT  key | foreach {
         #    $temp = $_;
@@ -333,7 +343,7 @@ function GetBitbucketAuditReport {
             #---------------------------------------------------------------------
             # Getting Cluster and convert to HTML fragment
             #---------------------------------------------------------------------
-            Write-Host "Collecting Cluster Information...";
+            Write-Host "`nCollecting Cluster Information...";
             #Start-Job -Name "Cluster" -ScriptBlock { 
                 $Cluster = Invoke-RestMethod -Headers ${header} -Uri "${BitbucketURI}/admin/cluster?limit=${limits}" -Method Get;
             #};
@@ -355,7 +365,7 @@ function GetBitbucketAuditReport {
             #---------------------------------------------------------------------
             # Getting License and convert to HTML fragment
             #---------------------------------------------------------------------
-            Write-Host "License Users Information...";
+            Write-Host "`nLicense Users Information...";
             #Start-Job -Name "License" -ScriptBlock { 
                 $License = Invoke-RestMethod -Headers ${header} -Uri "${BitbucketURI}/admin/license?limit=${limits}" -Method Get;
             #};
@@ -379,28 +389,35 @@ function GetBitbucketAuditReport {
         # Generate the HTML report and output to file
         #---------------------------------------------------------------------
         #region ReportDetail
-        Write-Host "Producing HTML report";
+        Write-Host "`nProducing HTML report...";
     
         $reportime = Get-Date -format f;
+        $elapsedTime = ([datetime]$( ( Get-Date ) - ${StartTime}).Ticks );
         
         #Common HTML head and styles
-	    $htmlhead="<html>
-				    <style>
-				        BODY {font-family: Arial; font-size: 8pt;}
-				        H1 {font-size: 20px;}
-				        H2 {font-size: 18px;}
-				        H3 {font-size: 16px;}
-				        TABLE {border: 1px solid black; border-collapse: collapse; font-size: 8pt;}
-				        TH {border: 1px solid black; background: #dddddd; padding: 5px; color: #000000;}
-				        TD {border: 1px solid black; padding: 5px; }
-				        td.pass {background: #7FFF00;}
-				        td.warn {background: #FFE600;}
-				        td.fail {background: #FF0000; color: #ffffff;}
-				        td.info {background: #85D4FF;}
-				    </style>
-				    <body>
-				    <h1 align=""center"">Server Info: $($env:COMPUTERNAME)</h1>
-				    <h3 align=""center"">Generated: ${reportime}</h3>"
+	    $htmlhead = "<html>
+				        <style>
+				                    BODY {{font-family: Arial; font-size: 8pt;}}
+				                    H1 {{font-size: 20px;}}
+				                    H2 {{font-size: 18px;}}
+				                    H3 {{font-size: 16px;}}
+				                    TABLE {{ border: 1px solid black; border-collapse: collapse; font-size: 8pt; }}
+				                    TH {{ border: 1px solid black; background: #dddddd; padding: 5px; color: #000000; }}
+				                    TD {{ border: 1px solid black; padding: 5px; }}
+				                    td.pass {{ background: #7FFF00; }}
+				                    td.warn {{ background: #FFE600; }}
+				                    td.fail {{ background: #FF0000; color: #ffffff; }}
+				                    td.info {{ background: #85D4FF; }}
+				        </style>
+				        <body>
+				        <h1 align=""center"">Server Info: {0}</h1>
+				        <h3 align=""center"">Generated: {1}</h3>
+                        <h3 align=""center"">Elapsed Time to Generate Report: {2:HH:mm:ss}</h3>" -f ( 
+                                                                                                        $($env:COMPUTERNAME),
+                                                                                                        ${reportime}, 
+                                                                                                        ${elapsedTime}
+                                                                                                    );
+        
         
         $htmltail = "</body>
 			    </html>"
@@ -418,4 +435,4 @@ function GetBitbucketAuditReport {
 
     #} #End
 	
-}  #Function
+#}  #Function
