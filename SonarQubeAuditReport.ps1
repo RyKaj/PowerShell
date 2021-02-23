@@ -1,4 +1,4 @@
-﻿<# 
+<# 
 .AUTHOR: Ryan Kajiura - http://ca.linkedin.com/in/ryankajiura
 
 .SYNOPSIS 
@@ -38,19 +38,23 @@ Z.PARAMETER -DebugMode
 
 #region PublicFunction
 
-    function GetSonarQubeReport {
-        param(
-            [Parameter(Mandatory=$true)] [String] ${SonarQubeDomain}
-		    , [Parameter(Mandatory=$true)] [String] ${username}
-		    , [Parameter(Mandatory=$true)] [String] ${password}
-		    , [Parameter(Mandatory=$true)] [String[]] ${UsersCommit}
-		    , [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\SonarQubeReport.html"
-		    , [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
-            , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
-            )
+#    function GetSonarQubeReport {
+#        param(
+#            [Parameter(Mandatory=$true)] [String] ${SonarQubeDomain}
+#		    , [Parameter(Mandatory=$true)] [String] ${username}
+#		    , [Parameter(Mandatory=$true)] [String] ${password}
+#		    , [Parameter(Mandatory=$true)] [String[]] ${UsersCommit}
+#		    , [Parameter(Mandatory=$false)] [String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\SonarQubeReport.html"
+#		    , [Parameter(Mandatory=$false)] [String] ${RecordLimit} = 1000
+#            , [Parameter(Mandatory=$false)] [bool] $DebugMode = $false
+#            )
         clear;
+
+[String] ${SonarQubeDomain} = "http://sonarqube.pyrsoftware.ca"
+[String] ${outputlocation} = "$($env:USERPROFILE)\Downloads\SonarQubeReport.html"
+[String] ${RecordLimit} = 1000
     
-        write-host "function being executed '$($MyInvocation.MyCommand)' ";
+#        write-host "function being executed '$($MyInvocation.MyCommand)' ";
 	
 
         #######################################################################################################
@@ -59,10 +63,10 @@ Z.PARAMETER -DebugMode
         [DateTime] $STARTTIME = get-date;            	        
         [String] $SPACER = "<br />";
 
-        [String]$username = "d320bcb3d6c44ccc7f9cdc4059c7dabdd6aaaf38"; #ITDev
+        [String]$username = "03ff750ea6db9c76e1d572155373ead678125da3"; #Report
         [String]$password = "";
     
-        [String]$SONARQUBEURI = "${SonarQubeDomain}/sonar"
+        [String]$SONARQUBEURI = "${SonarQubeDomain}"
 
 
         #################################################################################################
@@ -81,162 +85,354 @@ Z.PARAMETER -DebugMode
 
         #    BEGIN{
             
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "version" -ScriptBlock { 
                     Write-Host "Collecting SonarQube version...";
                     $SQVersion = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/server/version" -Method Get;
                 #};
+                #Wait-Job -Name "version";
 
-
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "ComputerEngineActivity" -ScriptBlock { 
                     Write-Host "Collecting Computer Engine Activity Information...";
-                    $ComputerEngineActivity = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/activity" -Method Get;
+                    try { 
+                        $ComputerEngineActivity = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/activity" -Method Get;
+                    }
+                    catch { 
+                        Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                #    Write-Host "Collecting Computer Engine Component Information...";
-                #    $ComputerEngineComponent = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/component" -Method Get;
+                #Wait-Job -Name "ComputerEngineActivity";
+
+                #Start-Job -Name "ComputerEngineComponent" -ScriptBlock { 
+                    Write-Host "Collecting Computer Engine Component Information...";
+                    try { 
+                        $ComputerEngineComponent = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/component" -Method Get;
+                    }
+                    catch {
+                        Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                #    Write-Host "Collecting Computer Engine Tasks Information...";
-                #    $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/task" -Method Get;
+                #Wait-Job -Name "ComputerEngineComponent";
+                
+                #Start-Job -Name "ComputerEngineTasks" -ScriptBlock { 
+                    Write-Host "Collecting Computer Engine Tasks Information...";
+                    try { 
+                        $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/ce/task" -Method Get;
+                    }
+                    catch {
+                        Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                #    Write-Host "Collecting Components Information...";
-                #    $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/show" -Method Get;
+                #Wait-Job -Name "ComputerEngineTasks";
+
+                #Start-Job -Name "ComputerEngineTasks" -ScriptBlock { 
+                    Write-Host "Collecting Components Information...";
+                    try { 
+                        $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/show" -Method Get;
+                    }
+                    catch {
+                        Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                #    Write-Host "Collecting Components Tree Information...";
-                #    $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/tree" -Method Get;
+                #Wait-Job -Name "ComputerEngineTasks";
+
+                #Start-Job -Name "ComputerEngineTasks" -ScriptBlock { 
+                    Write-Host "Collecting Components Tree Information...";
+                    try { 
+                        $ComputerEngineTasks = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/tree" -Method Get;
+                    }
+                    catch {
+                        Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                #    Write-Host "Collecting Components Tree Information...";
-                #    $DuplicationList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/show" -Method Get;
+                #Wait-Job -Name "ComputerEngineTasks";
+
+                #Start-Job -Name "DuplicationList" -ScriptBlock { 
+                    Write-Host "Collecting Components Tree Information...";
+                    try { 
+                        $DuplicationList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/components/show" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "DuplicationList";
+
+                #Start-Job -Name "FavoriteList" -ScriptBlock { 
                     Write-Host "Collecting Favorites Information...";
-                    $FavoriteList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/favorites/search" -Method Get;
+                    try { 
+                        $FavoriteList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/favorites/search" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "FavoriteList";
+
+                #Start-Job -Name "SCMAccounts" -ScriptBlock { 
                     Write-Host "Collecting SCM Accounts Information...";
-                    $SCMAccounts = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/authors" -Method Get;            
+                    try { 
+                        $SCMAccounts = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/authors" -Method Get;            
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
+                #Wait-Job -Name "SCMAccounts";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "Issues" -ScriptBlock { 
                     Write-Host "Collecting Issues Information...";
-                    $Issues = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/search" -Method Get;
+                    try { 
+                        $Issues = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/search" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
+                #Wait-Job -Name "Issues";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "Tags" -ScriptBlock { 
                     Write-Host "Collecting Tags Information...";
-                    $Tags = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/tags" -Method Get;
+                    try { 
+                        $Tags = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/issues/tags" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
+                #Wait-Job -Name "Tags";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "LangList" -ScriptBlock { 
                     Write-Host "Collecting Language Information...";
-                    $LangList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/languages/list" -Method Get;
+                    try { 
+                        $LangList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/languages/list" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "LangList";
 
 
-                #api/measures/component
-                #api/measures/component_tree
-                #api/measures/search_history
+# #api/measures/component
+# #api/measures/component_tree
+# #api/measures/search_history
+# $Test = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/settings/list_definitions" -Method Get;
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "CustomMetricsList" -ScriptBlock { 
                     Write-Host "Collecting Custom Metrics Information...";
-                    $CustomMetricsList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/domains" -Method Get;
+                    try { 
+                        $CustomMetricsList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/domains" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "CustomMetricsList";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "MetricsList" -ScriptBlock { 
                     Write-Host "Collecting Metrics Information...";
-                    $MetricsList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/search" -Method Get;
+                    try { 
+                        $MetricsList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/search" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "MetricsList";
+
+                #Start-Job -Name "MetricsTypes" -ScriptBlock { 
                     Write-Host "Collecting Metrics Types Information...";
-                    $MetricsTypes = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/types" -Method Get;
+                    try { 
+                        $MetricsTypes = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/metrics/types" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "MetricsTypes";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "NotificationMethods" -ScriptBlock { 
                     Write-Host "Collecting Notification Methods Information...";
-                    $NotificationMethods = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/notifications/list" -Method Get;
+                    try { 
+                        $NotificationMethods = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/notifications/list" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "NotificationMethods";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "PermissionTemplates" -ScriptBlock { 
                     Write-Host "Collecting Permission template Information...";
-                    $PermissionTemplates = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/permissions/search_templates" -Method Get;
+                    try { 
+                        $PermissionTemplates = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/permissions/search_templates" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "PermissionTemplates";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "PluginInstalled" -ScriptBlock { 
                     Write-Host "Collecting Installed Plugins Information...";
-                    $PluginInstalled = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/plugins/installed" -Method Get;
+                    try { 
+                        $PluginInstalled = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/plugins/installed" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "PluginInstalled";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "PluginRequireUpdated" -ScriptBlock { 
                     Write-Host "Collecting Installed Plugins Require Update Information...";
-                    $PluginRequireUpdated = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/plugins/updates" -Method Get;
+                    try { 
+                        $PluginRequireUpdated = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/plugins/updates" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "PluginRequireUpdated";
 
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Start-Job -Name "ProjectList" -ScriptBlock { 
                     Write-Host "Collecting Project Information...";
-                    $ProjectList= Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/projects/search" -Method Get;
+                    try { 
+                        $ProjectList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/projects/search" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "ProjectList";
+
+                #Start-Job -Name "DefinitionList" -ScriptBlock { 
                     Write-Host "Collecting Definition Information...";
-                    $DefinitionList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/settings/list_definitions" -Method Get;
+                    try { 
+                        $DefinitionList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/settings/list_definitions" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "FeeDefinitionListds";
+
+                #Start-Job -Name "SettingList" -ScriptBlock { 
                     Write-Host "Collecting Settings Information...";
-                    $SettingList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/settings/values" -Method Get;
+                    try { 
+                        $SettingList = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/settings/values" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "SettingList";
+
                 #Start-Job -Name "Feeds" -ScriptBlock { 
                     Write-Host "Collecting Database Migration Information...";
-                    $SysDBMigration = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/db_migration_status" -Method Get;
+                    try { 
+                        $SysDBMigration = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/db_migration_status" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
                 #Wait-Job -Name "Feeds";
+
                 #Start-Job -Name "Feeds" -ScriptBlock { 
                     Write-Host "Collecting System Health Information...";
-                    $SysHealth = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/health" -Method Get;
+                    try { 
+                        $SysHealth = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/health" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
                 #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+
+                #Start-Job -Name "SysLogs" -ScriptBlock { 
                     Write-Host "Collecting System Logs Information...";
-                    $SysLogs = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/logs" -Method Get;
+                    try { 
+                        $SysLogs = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/logs" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "SysLogs";
+
+                #Start-Job -Name "SysStatus" -ScriptBlock { 
                     Write-Host "Collecting System Status Information...";
-                    $SysStatus = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/status" -Method Get;
+                    try { 
+                        $SysStatus = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/status" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "SysStatus";
+
+                #Start-Job -Name "SysUpgrade" -ScriptBlock { 
                     Write-Host "Collecting System Upgrade Information...";
-                    $SysUpgrade = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/upgrades" -Method Get;
+                    try { 
+                        $SysUpgrade = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/upgrades" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
+                #Wait-Job -Name "SysUpgrade";
+
+                #Start-Job -Name "Groups" -ScriptBlock { 
                     Write-Host "Collecting Groups Information...";
-                    $Groups = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/user_groups/search" -Method Get;
+                    try { 
+                        $Groups = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/system/upgrades" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
-                #Start-Job -Name "Feeds" -ScriptBlock { 
-                    Write-Host "Collecting System Upgrade Information...";
-                    $User = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/users/search" -Method Get;
+                #Wait-Job -Name "Groups";
+
+                #Start-Job -Name "User" -ScriptBlock { 
+                    Write-Host "Collecting User Information...";
+                    try { 
+                        $User = Invoke-RestMethod -Headers ${header} -Uri "${SONARQUBEURI}/api/users/search" -Method Get;
+                    }
+                    catch {
+						Write-Verbose -Verbose $_;
+                    }
+                    finally { }
                 #};
-                #Wait-Job -Name "Feeds";
+                #Wait-Job -Name "User";
+
 
         #    }  #BEGIN
         
@@ -302,7 +498,7 @@ Z.PARAMETER -DebugMode
                 $htmlbody += ${subhead};
 
                 
-                $htmlbody +=  $FavoriteList.favorites   | 
+                $htmlbody +=  $FavoriteList.favorites | 
                                 select  organization,
                                         key,
                                         name,
@@ -339,14 +535,14 @@ Z.PARAMETER -DebugMode
                 # Getting all the Languages and convert to HTML fragment
                 #---------------------------------------------------------------------
                 #region Issues
-                #Write-Host "Processing Issues Information...";
-                #$subhead = "<h2>SCM Accounts</h2>";
-                #$htmlbody += ${subhead};
-                #    
-                #$htmlbody +=  $Issues.issues | 
-                #                ConvertTo-Html -Fragment;
-                #
-                #$htmlbody += ${SPACER};
+                Write-Host "Processing Issues Information...";
+                $subhead = "<h2>Issues</h2>";
+                $htmlbody += ${subhead};
+                    
+                $htmlbody +=  $Issues.issues | 
+                                ConvertTo-Html -Fragment;
+                
+                $htmlbody += ${SPACER};
 
                 #endregion Issues            
 
@@ -795,10 +991,19 @@ Z.PARAMETER -DebugMode
                 $htmlbody +=  $SysUpgrade.upgrades |
                                 Select  version,
                                         description,
-                                        releasedata,
-                                        chagnelogurl,
-                                        downlaodurl,
-                                        plugins |
+                                        releaseDate,
+                                        changeLogUrl,
+                                        downloadUrl,
+                                        @{
+                                            name = "plugins"
+                                            Expression = {
+                                                $(
+                                                    Foreach ($property in $_.plugins.PSObject.Properties) {
+                                                        "$($property.Name) - $($property.Value) "
+                                                    }
+                                                )
+                                            }
+                                        } |
                                 ConvertTo-Html -Fragment;
 
                 $htmlbody += ${SPACER};
@@ -836,7 +1041,7 @@ Z.PARAMETER -DebugMode
                 $htmlbody +=  $User.users |
                                 Select  login,
                                         name,
-                                        actiem,
+                                        active,
                                         @{
                                             name = "groups"
                                             Expression = {
@@ -847,9 +1052,7 @@ Z.PARAMETER -DebugMode
                                                 )
                                             }
                                         },
-                                        tofkenscount,
                                         local,
-                                        edtranlidentity,
                                         externalprovider |
                                 ConvertTo-Html -Fragment;
 
@@ -867,25 +1070,34 @@ Z.PARAMETER -DebugMode
                 Write-Host "Producing HTML report";
     
                 $reportime = Get-Date -format f;
+                $elapsedTime = ([datetime]$( ( Get-Date ) - ${StartTime}).Ticks );
         
                 #Common HTML head and styles
-                $htmlhead="<html>
-			                <style>
-				                BODY {font-family: Arial; font-size: 8pt;}
-				                H1 {font-size: 20px;}
-				                H2 {font-size: 18px;}
-				                H3 {font-size: 16px;}
-				                TABLE {border: 1px solid black; border-collapse: collapse; font-size: 8pt;}
-				                TH {border: 1px solid black; background: #dddddd; padding: 5px; color: #000000;}
-				                TD {border: 1px solid black; padding: 5px; }
-				                td.pass {background: #7FFF00;}
-				                td.warn {background: #FFE600;}
-				                td.fail {background: #FF0000; color: #ffffff;}
-				                td.info {background: #85D4FF;}
-			                </style>
-			                <body>
-			                <h1 align=""center"">Server Info: $env:computername</h1>
-			                <h3 align=""center"">Generated: ${reportime}</h3>"
+	            $htmlhead = "<html>
+				                <style>
+				                    BODY {{font-family: Arial; font-size: 8pt;}}
+				                    H1 {{font-size: 20px;}}
+				                    H2 {{font-size: 18px;}}
+				                    H3 {{font-size: 16px;}}
+				                    TABLE {{ border: 1px solid black; border-collapse: collapse; font-size: 8pt; }}
+				                    TH {{ border: 1px solid black; background: #dddddd; padding: 5px; color: #000000; }}
+				                    TD {{ border: 1px solid black; padding: 5px; }}
+				                    td.pass {{ background: #7FFF00; }}
+				                    td.warn {{ background: #FFE600; }}
+				                    td.fail {{ background: #FF0000; color: #ffffff; }}
+				                    td.info {{ background: #85D4FF; }}
+				                </style>
+				                <body>
+				                <h1 align=""center"">Server Executed On: {0}</h1>
+                                <h2 align=""center"">SonarQube Version: {1}</h2>
+				                <h3 align=""center"">Generated: {2:HH:mm:ss}</h3>
+                                <h3 align=""center"">Elapsed Time to Generate Report: {3:HH:mm:ss}</h3>" -f ( 
+                                                                                                                $($env:COMPUTERNAME),
+                                                                                                                $($SQVersion),
+                                                                                                                $($reportime), 
+                                                                                                                $($elapsedTime)
+                                                                                                            );
+
 
                 $htmltail = "</body>
 		                </html>"
@@ -894,16 +1106,13 @@ Z.PARAMETER -DebugMode
             
                 #endregion ReportDetail
         
-                write-host "Generated File stored '${outputlocation}' ";
-                $htmlreport | Out-File ${outputlocation} -Encoding Utf8 -force;
-
-                write-host "-------------------------------------------------------------------";
-                "Total Duration: {0:HH:mm:ss}" -f ([datetime]$((get-date) - ${StartTime}).Ticks) | write-host;
-                write-host "-------------------------------------------------------------------";
+                Write-Verbose -Verbose ( "Total Duration: {0:HH:mm:ss}" -f ${elapsedTime} ) ;
+		        Write-Verbose -Verbose "Generated File ${outputlocation}";
+		        $htmlreport | Out-File ${outputlocation} -Encoding Utf8 -force;
 
             #} #End
 
 
-    } # GetSonarQubeReport
+#    } # GetSonarQubeReport
 
 #endregion PublicFunction
